@@ -1,11 +1,28 @@
 var express = require('express');
-
+var path = require('path');
 var app = express();
-var port = 8000;
-app.listen(8000);
 
-console.log("Express erver listening to port " + port);
+require('./routes')(app);
 
-app.get('/', function(req, res) {
-    res.send("welcome to CS1501");
+// Points Express to a folder where you keep static files
+// e.g. css or client side js files
+app.use(express.static(path.normalize(__dirname) + '/public'))
+
+// Tell express to use its built in error handler
+app.use(express.errorHandler());
+
+app.configure(function() {
+	app.use(express.logger('dev'));
+	app.use(express.bodyParser());
 });
+
+// These 3 lines tell express taht we are goin to be rendering html files
+// held in the public directory which should be in teh sam dir as this file
+app.set('views', path.normalize(__dirname) + '/public');
+app.set('view engine', 'html');
+app.engine('html', require('ejs').renderFile);
+
+var port = Number(process.env.PORT || 8000);
+app.listen(port);
+
+console.log("Express server listening to port " + port);
